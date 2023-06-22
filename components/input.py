@@ -10,6 +10,11 @@ def Input(callback):
         if not value:
             return
         callback(value)
+        set_value('')
+
+    def on_key_down(e):
+        if e['code'] == 'Enter':
+            on_click(e)
 
     return html.div(
         { 'style': center() },
@@ -19,7 +24,7 @@ def Input(callback):
                 'placeholder': 'タスクの追加',
                 'value': value,
                 'on_change': lambda e: set_value(e['target']['value']),
-                'onKeyDown': lambda e: print(e),
+                'onKeyDown': on_key_down,
                 'style': '''
                     width: 300px;
                     height: 20px;

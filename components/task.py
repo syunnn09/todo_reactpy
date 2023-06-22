@@ -1,11 +1,11 @@
 from reactpy import component, html, hooks
-import sqlite3
 
 from components.checkbox import Checkbox
 from components.trash_can import Trush_can
 from styles import *
 import exhtml
-import dbutils
+import utils.dbutils as dbutils
+from utils.popuputils import PopupYesNo
 
 def set_favorite(is_favorite: int, todo_id: int):
     conn, cur = dbutils.connect()
@@ -17,10 +17,6 @@ def set_completed(is_completed: int, todo_id: int):
     cur.execute('UPDATE todo SET isCompleted=? WHERE todoId=?', (is_completed, todo_id))
     dbutils.close(conn, cur)
 
-def delete_task(todo_id: int):
-    conn, cur = dbutils.connect()
-    cur.execute('DELETE FROM todo WHERE todoId=?', (todo_id, ))
-    dbutils.close(conn, cur)
 
 @component
 def Task(tup: tuple):
@@ -28,6 +24,7 @@ def Task(tup: tuple):
 
     is_favorite, set_is_favorite = hooks.use_state(is_favorite)
     is_completed, set_is_completed = hooks.use_state(is_completed)
+    popup, set_popup = hooks.use_state(None)
 
     def reverse_favorite(is_favorite):
         if is_favorite == 0:
@@ -45,8 +42,17 @@ def Task(tup: tuple):
         set_is_completed(is_completed)
         return is_completed
 
+    def delete_task(e):
+        conn, cur = dbutils.connect()
+        cur.execute('DELETE FROM todo WHERE todoId=?', (todo_id, ))
+        dbutils.close(conn, cur)
+        set_popup(None)
+
+    def close_popup(e):
+        set_popup(None)
+
     def on_delete():
-        delete_task(todo_id)
+        set_popup(lambda e: PopupYesNo('削除してもよろしいですか？', delete_task, close_popup))
 
     def create_star_svg():
         if is_favorite:
@@ -105,5 +111,6 @@ def Task(tup: tuple):
             },
             create_star_svg()
         ),
-        Trush_can(on_delete, margin='0 0.5rem')
+        Trush_can(on_delete, margin='0 0.5rem', width='25px', height='25px'),
+        popup if popup else ''
     )
