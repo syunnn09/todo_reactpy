@@ -3,8 +3,8 @@ from reactpy import component, html, hooks
 from styles import center
 
 @component
-def Input(callback):
-    value, set_value = hooks.use_state('')
+def Input(callback, value: str = ''):
+    value, set_value = hooks.use_state(value)
 
     def on_click(e):
         if not value:

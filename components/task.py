@@ -1,5 +1,6 @@
 from reactpy import component, html, hooks
 
+from components.input import Input
 from components.checkbox import Checkbox
 from components.trash_can import Trush_can
 from styles import *
@@ -17,30 +18,27 @@ def set_completed(is_completed: int, todo_id: int):
     cur.execute('UPDATE todo SET isCompleted=? WHERE todoId=?', (is_completed, todo_id))
     dbutils.close(conn, cur)
 
+def set_db_title(title: int, todo_id: int):
+    conn, cur = dbutils.connect()
+    cur.execute('UPDATE todo SET title=? WHERE todoId=?', (title, todo_id))
+    dbutils.close(conn, cur)
 
 @component
-def Task(tup: tuple):
+def Task(tup: tuple, set_popup):
     todo_id, title, is_completed, is_favorite, created_at = tup
 
+    title, set_title = hooks.use_state(title)
     is_favorite, set_is_favorite = hooks.use_state(is_favorite)
     is_completed, set_is_completed = hooks.use_state(is_completed)
-    popup, set_popup = hooks.use_state(None)
+    title_label, set_title_label = hooks.use_state(html.p({ 'style': 'margin: 0;' }, title))
 
-    def reverse_favorite(is_favorite):
-        if is_favorite == 0:
-            is_favorite = 1
+    def reverse_value(value, func):
+        if value == 0:
+            value = 1
         else:
-            is_favorite = 0
-        set_is_favorite(is_favorite)
-        return is_favorite
-
-    def reverse_completed(is_completed):
-        if is_completed == 0:
-            is_completed = 1
-        else:
-            is_completed = 0
-        set_is_completed(is_completed)
-        return is_completed
+            value = 0
+        func(value)
+        return value
 
     def delete_task(e):
         conn, cur = dbutils.connect()
@@ -90,27 +88,35 @@ def Task(tup: tuple):
                 )
             )
 
+    def edit_title(value):
+        set_db_title(value, todo_id)
+        set_title(value)
+        set_title_label(html.p({ 'style': 'margin: 0;' }, title))
+
+    def edit(e):
+        set_title_label(Input(edit_title, value=title))
+
     return html.div(
         { 'style': center() },
         Checkbox(
             is_completed,
-            lambda e: set_completed(reverse_completed(is_completed), todo_id),
+            lambda e: set_completed(reverse_value(is_completed, set_is_completed), todo_id),
             margin='0 0.5rem'
         ),
         html.div(
             {
+                'on_click': edit,
                 'class': 'task',
                 'style': 'margin: 0 0.5rem;'    
             },
-            title
+            title_label
         ),
         html.div(
             {
-                'on_click': lambda e: set_favorite(reverse_favorite(is_favorite), todo_id),
+                'on_click': lambda e: set_favorite(reverse_value(is_favorite, set_is_favorite), todo_id),
                 'style': 'margin: 0 0.5rem; height: 30px; cursor: pointer;'
             },
             create_star_svg()
         ),
         Trush_can(on_delete, margin='0 0.5rem', width='25px', height='25px'),
-        popup if popup else ''
     )
