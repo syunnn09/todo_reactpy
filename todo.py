@@ -34,8 +34,11 @@ def Todo():
     return html.div(
         Input(add_todo),
         html.div(
-            { 'style': 'width: 100%; margin-top: 2rem;' },
-            tasks
+            { 'style': 'display: flex;' },
+            html.div(
+                { 'style': 'flex: 1; margin-top: 2rem;' },
+                tasks
+            )
         ),
         (popup if popup is not None else '')
     )

@@ -40,8 +40,7 @@ def PopupYesNo(comment, ok_callback, no_callback, ok_word='OK', no_word='キャ�
         html.div(
             {
                 'style': '''
-                    width: 90vw;
-                    max-width: 380px;
+                    min-width: 380px;
                     height: 130px;
                     background-color: #fff;
                     border-radius: 6px;
@@ -52,13 +51,25 @@ def PopupYesNo(comment, ok_callback, no_callback, ok_word='OK', no_word='キャ�
                     transform: translate(-50%, -50%);
                 '''
             },
-            html.p(
-                { 'style': 'font-size: 20px; text-align: center;' }, comment
-            ),
             html.div(
-                { 'style': center() + 'gap: 1rem;' },
-                Button(ok_word, lambda e: ok_callback(e), color='#fff', background_color='#f00'),
-                Button(no_word, lambda e: no_callback(e))
+                {
+                    'style': '''
+                        height: 100%;
+                        padding: 10px 0;
+                        display: flex;
+                        justify-content: space-around;
+                        align-items: center;
+                        flex-direction: column;
+                    '''
+                },
+                html.p(
+                    { 'style': 'padding: 0 1rem; font-size: 20px; text-align: center;' }, comment
+                ),
+                html.div(
+                    { 'style': center() + 'gap: 1rem;' },
+                    Button(ok_word, lambda e: ok_callback(e), color='#fff', background_color='#f00'),
+                    Button(no_word, lambda e: no_callback(e))
+                )
             )
         )
     )

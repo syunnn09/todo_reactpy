@@ -8,6 +8,7 @@ import exhtml
 import utils.dbutils as dbutils
 from utils.popuputils import PopupYesNo
 
+
 def set_favorite(is_favorite: int, todo_id: int):
     conn, cur = dbutils.connect()
     cur.execute('UPDATE todo SET isFavorite=? WHERE todoId=?', (is_favorite, todo_id))
@@ -27,10 +28,13 @@ def set_db_title(title: int, todo_id: int):
 def Task(tup: tuple, set_popup):
     todo_id, title, is_completed, is_favorite, created_at = tup
 
+    def get_default_title_label():
+        return html.p({ 'style': 'cursor: pointer;' }, title)
+
     title, set_title = hooks.use_state(title)
     is_favorite, set_is_favorite = hooks.use_state(is_favorite)
     is_completed, set_is_completed = hooks.use_state(is_completed)
-    title_label, set_title_label = hooks.use_state(html.p({ 'style': 'margin: 0;' }, title))
+    title_label, set_title_label = hooks.use_state(get_default_title_label())
 
     def reverse_value(value, func):
         if value == 0:
@@ -91,7 +95,7 @@ def Task(tup: tuple, set_popup):
     def edit_title(value):
         set_db_title(value, todo_id)
         set_title(value)
-        set_title_label(html.p({ 'style': 'margin: 0;' }, title))
+        set_title_label(get_default_title_label())
 
     def edit(e):
         set_title_label(Input(edit_title, value=title))
@@ -107,7 +111,7 @@ def Task(tup: tuple, set_popup):
             {
                 'on_click': edit,
                 'class': 'task',
-                'style': 'margin: 0 0.5rem;'    
+                'style': 'margin: 0 0.5rem; width: 50%; overflow: hidden;'    
             },
             title_label
         ),

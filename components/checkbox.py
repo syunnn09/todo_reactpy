@@ -35,8 +35,8 @@ def Checkbox(is_checked: bool, callback: Callable, margin: str = '0', width: str
                 margin: {margin};
                 width: {width};
                 height: {height};
-                border: 1px solid #000;
-                border-radius: 3px;
+                border: {'1px solid #000' if not is_checked else 'none'};
+                border-radius: 50%;
                 background-color: {default_color};
                 transition: opacity 2s ease-in-out;
                 cursor: pointer;
